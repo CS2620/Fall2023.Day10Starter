@@ -20,9 +20,6 @@ class Layer:
     from _advanced_transformations import get_expanded_matrix
     from _advanced_transformations import rotate_expand
 
-    
-
-
     def __init__(self, width: int, height: int, offset_x: float, offset_y: float):
         """Store the constructor arguments"""
         self.width, self.height = width, height
@@ -30,20 +27,20 @@ class Layer:
         self.pixels = [0, 0, 0] * self.width * self.height
 
     def generate_histogram(self):
-        layer = Layer(255, 100, 0,0)
+        layer = Layer(255, 100, 0, 0)
 
         histogram = [0] * 256
         for y in range(self.height):
             for x in range(self.width):
-                pixel = self.get_pixel(x,y)
+                pixel = self.get_pixel(x, y)
                 grayscale = math.floor((pixel[0] + pixel[1] + pixel[2])/3)
-                histogram[grayscale]+=1
+                histogram[grayscale] += 1
 
         max = 0
         for h in histogram:
             if h > max:
                 max = h
-        
+
         # Now normalize the histogram
         histogram_max = 100
         for i in range(256):
@@ -54,7 +51,40 @@ class Layer:
 
         # Draw the histogram
         for i in range(256):
-            layer.set_pixel(math.floor(i), math.floor(histogram[i]), (255,255,255))
+            for j in range(math.floor(histogram[i])):
+                layer.set_pixel(i, histogram_max - j, (255, 255, 255))
+
+        return layer
+    
+    def generate_row_histogram(self):
+        layer = Layer(self.width, 25, 0, 0)
+
+        histogram = [0] * self.width
+        for x in range(self.width):
+            sum = 0
+            for y in range(self.height):
+                pixel = self.get_pixel(x, y)
+                grayscale = math.floor((pixel[0] + pixel[1] + pixel[2])/3)
+                sum += grayscale
+            histogram[x] = sum
+
+        max = 0
+        for h in histogram:
+            if h > max:
+                max = h
+
+        # Now normalize the histogram
+        histogram_max = 25
+        for i in range(len(histogram)):
+            h = histogram[i]
+            h /= max
+            h *= histogram_max
+            histogram[i] = h
+
+        # Draw the histogram
+        for i in range(self.width):
+            for j in range(math.floor(histogram[i])):
+                layer.set_pixel(i, histogram_max - j, (255, 255, 255))
 
         return layer
 
@@ -68,10 +98,7 @@ class Layer:
         index = self.pixelIndex(x, y)
         return self.pixels[index]
 
-    def pixelIndex(self, x:int, y:int) -> int:
+    def pixelIndex(self, x: int, y: int) -> int:
         """Given x and y, find the index in our linear array."""
         index = y*self.width + x
         return index
-
-   
-    

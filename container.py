@@ -14,13 +14,16 @@ class Container:
     self.buffer = self.image.load()
     self.layers = []
 
-  def add_layer(self, layer:Layer):
+  def add_layer(self, layer:Layer, offset_x = 0, offset_y = 0):
     """Add a layer to the container
     
     Args:
       layer (Layer): The layer to add to the container
     """
     layer.parent = self
+    layer.offset_x = offset_x
+    layer.offset_y = offset_y
+    
     self.layers.append(layer)
 
   def resize(self, width, height):
@@ -40,10 +43,14 @@ class Container:
       filename (string): The filename to save to
     """
     for layer in self.layers:
+      ox = layer.offset_x
+      oy = layer.offset_y
+      # if oy < 0:
+      #   oy = self.height - oy
       for y in range(min(layer.height, self.height)):
         for x in range(min(layer.width, self.width)):
           color = layer.get_pixel(x,y)
-          self.buffer[x+layer.offset_x,y+layer.offset_y] = color
+          self.buffer[x+ox,y+oy] = color
     self.image.save(filename, "png")
 
   
