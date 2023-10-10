@@ -57,7 +57,7 @@ class Layer:
                 layer.set_pixel(i, histogram_max - j-1, (255, 255, 255))
 
         return layer
-    
+
     def generate_row_histogram(self):
         layer = Layer(self.width, 25, 0, 0)
 
@@ -89,7 +89,7 @@ class Layer:
                 layer.set_pixel(i, j, (255, 255, 255))
 
         return layer
-    
+
     def generate_column_histogram(self):
         layer = Layer(25, self.height, 0, 0)
 
@@ -118,31 +118,79 @@ class Layer:
         # Draw the histogram
         for i in range(self.height):
             for j in range(math.floor(histogram[i])):
-                layer.set_pixel(j,i, (255, 255, 255))
+                layer.set_pixel(j, i, (255, 255, 255))
 
         return layer
 
     def brighten(self, amount):
         for y in range(self.height):
             for x in range(self.width):
-                pixel = self.get_pixel(x,y)
+                pixel = self.get_pixel(x, y)
 
-                new_pixel = (
-                    min(255, max(0, pixel[0] + amount)), 
-                    min(255, max(0, pixel[1] + amount)), 
-                    min(255, max(0, pixel[2] + amount)))
+                new_pixel = (pixel[0] + amount, pixel[1] +
+                             amount, pixel[2] + amount)
 
-                self.set_pixel(x,y, new_pixel)
+                self.set_pixel(x, y, new_pixel)
 
-    
+    def add_contrast(self, amount):
+        for y in range(self.height):
+            for x in range(self.width):
+                pixel = self.get_pixel(x, y)
+                grayscale = (pixel[0] + pixel[1] + pixel[2])/3
+                to_add = amount
+                if grayscale < 128:
+                    to_add *= -1
+
+                new_pixel = (pixel[0] + to_add, pixel[1] +
+                             to_add, pixel[2] + to_add)
+
+                self.set_pixel(x, y, new_pixel)
+
+    def add_contrast2(self, amount):
+        for y in range(self.height):
+            for x in range(self.width):
+                pixel = self.get_pixel(x, y)
+                grayscale = (pixel[0] + pixel[1] + pixel[2])/3
+                offset = grayscale - 128
+                offset *= amount
+                offset += 128
+                offset = math.floor(offset - grayscale)
+
+                new_pixel = (pixel[0] + offset, pixel[1] +
+                             offset, pixel[2] + offset)
+
+                self.set_pixel(x, y, new_pixel)
+
+    def auto_tune(self):
+        sum = 0
+        for y in range(self.height):
+            for x in range(self.width):
+                pixel = self.get_pixel(x, y)
+                grayscale = (pixel[0] + pixel[1] + pixel[2])/3
+                sum += grayscale - 128
+        average_offset = sum // (self.height * self.width)
+                
+        for y in range(self.height):
+            for x in range(self.width):
+                pixel = self.get_pixel(x, y)
+                grayscale = (pixel[0] + pixel[1] + pixel[2])/3
+                
+                new_pixel = (pixel[0] + average_offset, pixel[1] +
+                             average_offset, pixel[2] + average_offset)
+
+                self.set_pixel(x, y, new_pixel)
 
     def set_pixel(self, x, y, color) -> None:
         """Set a pixel in the layer buffer"""
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             print("Bad set_pixel coordinate.")
             return
-        index = self.pixelIndex(x, y)
-        self.pixels[y*self.width+x] = color
+
+        new_color = (
+            min(255, max(0, color[0]))//1,
+            min(255, max(0, color[1]))//1,
+            min(255, max(0, color[2]))//1)
+        self.pixels[y*self.width+x] = new_color
 
     def get_pixel(self, x: int, y: int):
         """ Given x and y, return the color of the pixel"""
