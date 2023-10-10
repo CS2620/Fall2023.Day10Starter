@@ -33,12 +33,12 @@ def main():
     container.add_layer(layer1)
 
     """ Create a second comparison layer"""
-    layer2: Layer = Layer(width, height)
-    container.add_layer(layer2, width, 0)
+    # layer2: Layer = Layer(width, height)
+    # container.add_layer(layer2, width, 0)
 
     """ Loop through all the layer(s) and give them their colors"""
     layer1.pixels = list(image.getdata())
-    if layer2:
+    if 'layer2' in locals():
         layer2.pixels = list(image.getdata())
 
     """ Choose a custom transformation """
@@ -62,8 +62,8 @@ def main():
     layer1.brighten(100)
     # layer1.brighten(-100)
     container.add_layer(layer1.generate_histogram())
-    container.add_layer(layer2.generate_histogram(),layer2.width, 0)
-    container.pack()
+    # container.add_layer(layer2.generate_histogram(),layer2.width, 0)
+    # container.pack()
     container.save("done.png")
 
 

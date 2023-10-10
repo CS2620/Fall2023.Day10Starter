@@ -27,13 +27,15 @@ class Layer:
         self.pixels = [0, 0, 0] * self.width * self.height
 
     def generate_histogram(self):
-        layer = Layer(255, 100, 0, 0)
+        layer = Layer(256, 100, 0, 0)
 
         histogram = [0] * 256
         for y in range(self.height):
             for x in range(self.width):
                 pixel = self.get_pixel(x, y)
                 grayscale = math.floor((pixel[0] + pixel[1] + pixel[2])/3)
+                if grayscale >= 256:
+                    print("Stop")
                 histogram[grayscale] += 1
 
         max = 0
@@ -52,7 +54,7 @@ class Layer:
         # Draw the histogram
         for i in range(256):
             for j in range(math.floor(histogram[i])):
-                layer.set_pixel(i, histogram_max - j, (255, 0, 255))
+                layer.set_pixel(i, histogram_max - j-1, (255, 255, 255))
 
         return layer
     
@@ -136,6 +138,9 @@ class Layer:
 
     def set_pixel(self, x, y, color) -> None:
         """Set a pixel in the layer buffer"""
+        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+            print("Bad set_pixel coordinate.")
+            return
         index = self.pixelIndex(x, y)
         self.pixels[y*self.width+x] = color
 
