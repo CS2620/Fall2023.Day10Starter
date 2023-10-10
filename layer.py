@@ -20,7 +20,7 @@ class Layer:
     from _advanced_transformations import get_expanded_matrix
     from _advanced_transformations import rotate_expand
 
-    def __init__(self, width: int, height: int, offset_x: float, offset_y: float):
+    def __init__(self, width: int, height: int, offset_x=0, offset_y=0):
         """Store the constructor arguments"""
         self.width, self.height = width, height
         self.offset_x, self.offset_y = offset_x, offset_y
@@ -52,7 +52,7 @@ class Layer:
         # Draw the histogram
         for i in range(256):
             for j in range(math.floor(histogram[i])):
-                layer.set_pixel(i, histogram_max - j, (255, 255, 255))
+                layer.set_pixel(i, histogram_max - j, (255, 0, 255))
 
         return layer
     
@@ -119,6 +119,20 @@ class Layer:
                 layer.set_pixel(j,i, (255, 255, 255))
 
         return layer
+
+    def brighten(self, amount):
+        for y in range(self.height):
+            for x in range(self.width):
+                pixel = self.get_pixel(x,y)
+
+                new_pixel = (
+                    min(255, max(0, pixel[0] + amount)), 
+                    min(255, max(0, pixel[1] + amount)), 
+                    min(255, max(0, pixel[2] + amount)))
+
+                self.set_pixel(x,y, new_pixel)
+
+    
 
     def set_pixel(self, x, y, color) -> None:
         """Set a pixel in the layer buffer"""

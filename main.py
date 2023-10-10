@@ -12,7 +12,7 @@ import numpy as np
 
 def main():
     print("Start")
-    
+
     # Open an image, get its size, and access its pixel buffer
 
     """ There are multiple lines here to ease debugging"""
@@ -26,16 +26,20 @@ def main():
     height = image.size[1]
 
     """ Building a container for the image"""
-    container:Container = Container(width,height)
+    container: Container = Container(width, height)
 
     """ Create the layer that wi will be transforming. Add that to the container"""
-    layer1:Layer = Layer(width, height, 0, 0)
+    layer1: Layer = Layer(width, height, 0, 0)
     container.add_layer(layer1)
 
-    
+    """ Create a second comparison layer"""
+    layer2: Layer = Layer(width, height)
+    container.add_layer(layer2, width, 0)
+
     """ Loop through all the layer(s) and give them their colors"""
     layer1.pixels = list(image.getdata())
-    
+    if layer2:
+        layer2.pixels = list(image.getdata())
 
     """ Choose a custom transformation """
     # layer1.flip_horizontal_axis()
@@ -44,20 +48,27 @@ def main():
     # layer1.translate(100,100)
     # layer1.scale_backward(2,2)
     # layer1.scale_forward(2,2)
-    # layer1.scale_forward(1.1,1.1)    
+    # layer1.scale_forward(1.1,1.1)
     # layer1.rotate_same_size(math.pi/10)
     # layer1.rotate_expand(math.pi/3)
-    container.add_layer(layer1.generate_histogram())
-    container.add_layer(layer1.generate_row_histogram(), 0, -25)
-    container.add_layer(layer1.generate_column_histogram(), -25, 0)
+
+    # Generate the histograms for the image
+    # (container.add_layer(layer1.generate_histogram()) 
+    #     .add_layer(layer1.generate_row_histogram(), 0, -25) 
+    #     .add_layer(layer1.generate_column_histogram(), -25, 0) 
+    #     .expand_size(25, 25))
     
+    # Auto Adjust
+    layer1.brighten(100)
+    # layer1.brighten(-100)
+    container.add_layer(layer1.generate_histogram())
+    container.add_layer(layer2.generate_histogram(),layer2.width, 0)
+    container.pack()
     container.save("done.png")
+
 
 start = time.time()
 main()
 #cProfile.run("main()", "c:/tmp/tmp.prof")
 end = time.time()
 print(str(end - start) + " " + " seconds")
-
-
-
