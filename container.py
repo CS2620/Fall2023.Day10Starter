@@ -45,12 +45,21 @@ class Container:
     for layer in self.layers:
       ox = layer.offset_x
       oy = layer.offset_y
-      # if oy < 0:
-      #   oy = self.height - oy
+      if oy < 0:
+        oy = self.height + oy
+      if ox < 0:
+        ox = self.width + ox
       for y in range(min(layer.height, self.height)):
         for x in range(min(layer.width, self.width)):
           color = layer.get_pixel(x,y)
-          self.buffer[x+ox,y+oy] = color
+          planned_x, planned_y = x+ox,y+oy
+          if planned_x >= self.width or planned_x < 0:
+            print("You are out of bounds in x")
+            continue
+          if planned_y >= self.height or planned_y < 0:
+            print("You are out of bounds in y")
+            continue
+          self.buffer[planned_x, planned_y] = color
     self.image.save(filename, "png")
 
   

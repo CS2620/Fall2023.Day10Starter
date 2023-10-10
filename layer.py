@@ -84,7 +84,39 @@ class Layer:
         # Draw the histogram
         for i in range(self.width):
             for j in range(math.floor(histogram[i])):
-                layer.set_pixel(i, histogram_max - j, (255, 255, 255))
+                layer.set_pixel(i, j, (255, 255, 255))
+
+        return layer
+    
+    def generate_column_histogram(self):
+        layer = Layer(25, self.height, 0, 0)
+
+        histogram = [0] * self.height
+        for y in range(self.height):
+            sum = 0
+            for x in range(self.width):
+                pixel = self.get_pixel(x, y)
+                grayscale = math.floor((pixel[0] + pixel[1] + pixel[2])/3)
+                sum += grayscale
+            histogram[y] = sum
+
+        max = 0
+        for h in histogram:
+            if h > max:
+                max = h
+
+        # Now normalize the histogram
+        histogram_max = 25
+        for i in range(len(histogram)):
+            h = histogram[i]
+            h /= max
+            h *= histogram_max
+            histogram[i] = h
+
+        # Draw the histogram
+        for i in range(self.height):
+            for j in range(math.floor(histogram[i])):
+                layer.set_pixel(j,i, (255, 255, 255))
 
         return layer
 

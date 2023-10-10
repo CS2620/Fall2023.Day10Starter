@@ -48,7 +48,8 @@ def main():
     # layer1.rotate_same_size(math.pi/10)
     # layer1.rotate_expand(math.pi/3)
     container.add_layer(layer1.generate_histogram())
-    container.add_layer(layer1.generate_row_histogram(), 0, 100)
+    container.add_layer(layer1.generate_row_histogram(), 0, -25)
+    container.add_layer(layer1.generate_column_histogram(), -25, 0)
     
     container.save("done.png")
 
