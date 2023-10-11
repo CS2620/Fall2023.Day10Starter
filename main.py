@@ -8,78 +8,55 @@ import cProfile
 import time
 import math
 import numpy as np
+import os
 
 
 def main():
     print("Start")
 
-    # Open an image, get its size, and access its pixel buffer
+    dir = "./images/"
+    files = os.listdir(dir)
+    for file in files:
+        #Auto tune
+        container = get_layers_in_a_row(3, dir + file)
+        container.layers[1].auto_tune_brightness()
+        container.layers[2].auto_tune_brightness()
+        container.layers[2].auto_tune_contrast()
+        # layer1.auto_tune_brightness()
+        # layer1.auto_tune_contrast()
+        container.add_layer(container.layers[0].generate_histogram())
+        container.add_layer(container.layers[1].generate_histogram(), container.layers[1].width, 0)
+        container.add_layer(container.layers[2].generate_histogram(), container.layers[2].width*2, 0)
+        container.pack()
 
-    """ There are multiple lines here to ease debugging"""
-    # image = Image.open("./helpers/Debug1.png")
-    # image = Image.open("./helpers/DebugTiny.png")
-    image = Image.open("./images/address.jpg")
-    # image = Image.open("./images/band_small.png")
+        # Finally, save the image
+        print("Done with " + file)
+        container.save("done_" + file + ".png")
+        # break
 
+def get_layers_in_a_row(count, filename):
+    if count <= 0:
+        return print("You need to generate more than 0 layers")
+    if not filename:
+        return print("You forgot to all a filename")
+    
+    layers = []
+
+    image = Image.open(filename)
     """ Load the image and get its height and width"""
     width = image.size[0]
     height = image.size[1]
 
     """ Building a container for the image"""
     container: Container = Container(width, height)
-
-    """ Create the layer that wi will be transforming. Add that to the container"""
-    layer1: Layer = Layer(width, height, 0, 0)
-    container.add_layer(layer1)
-
-    """ Create a second comparison layer"""
-    layer2: Layer = Layer(width, height)
-    container.add_layer(layer2, width, 0)
-
-    """ Loop through all the layer(s) and give them their colors"""
-    layer1.pixels = list(image.getdata())
-    if 'layer2' in locals():
-        layer2.pixels = list(image.getdata())
-
-    """ Choose a custom transformation """
-    # layer1.flip_horizontal_axis()
-    # layer1.flip_vertical_axis()
-    # layer1.rotate_counter_clockwise()
-    # layer1.translate(100,100)
-    # layer1.scale_backward(2,2)
-    # layer1.scale_forward(2,2)
-    # layer1.scale_forward(1.1,1.1)
-    # layer1.rotate_same_size(math.pi/10)
-    # layer1.rotate_expand(math.pi/3)
-
-    # Generate the histograms for the image
-    # (container.add_layer(layer1.generate_histogram()) 
-    #     .add_layer(layer1.generate_row_histogram(), 0, -25) 
-    #     .add_layer(layer1.generate_column_histogram(), -25, 0) 
-    #     .expand_size(25, 25))
-
-    # Compare brightened images
-    # layer1.add_contrast(50)
-    # container.add_layer(layer1.generate_histogram())
-    # container.add_layer(layer2.generate_histogram(),layer2.width, 0)
-    # container.pack()
+    for i in range(count):
+        layer: Layer = Layer(width, height, 0, 0)
+        layer.pixels = list(image.getdata())
+        container.add_layer(layer, layer.width * i)
     
-    # Compare contrast methods
-    # layer1.add_contrast(50)
-    # layer2.add_contrast2(2)
-    # container.add_layer(layer1.generate_histogram())
-    # container.add_layer(layer2.generate_histogram(),layer2.width, 0)
-    # container.pack()
+    return container
 
-
-    #Auto tune
-    layer1.auto_tune()
-    container.add_layer(layer1.generate_histogram())
-    container.add_layer(layer2.generate_histogram(),layer2.width, 0)
-    container.pack()
-
-    # Finally, save the image
-    container.save("done.png")
+    
 
 
 start = time.time()

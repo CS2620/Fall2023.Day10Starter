@@ -161,24 +161,71 @@ class Layer:
 
                 self.set_pixel(x, y, new_pixel)
 
-    def auto_tune(self):
+    def auto_tune_brightness(self):
         sum = 0
         for y in range(self.height):
             for x in range(self.width):
                 pixel = self.get_pixel(x, y)
                 grayscale = (pixel[0] + pixel[1] + pixel[2])/3
                 sum += grayscale - 128
-        average_offset = sum // (self.height * self.width)
+        average_offset = -math.floor(sum // (self.height * self.width))
                 
         for y in range(self.height):
             for x in range(self.width):
                 pixel = self.get_pixel(x, y)
-                grayscale = (pixel[0] + pixel[1] + pixel[2])/3
+                grayscale = math.floor((pixel[0] + pixel[1] + pixel[2])/3)
                 
                 new_pixel = (pixel[0] + average_offset, pixel[1] +
                              average_offset, pixel[2] + average_offset)
 
                 self.set_pixel(x, y, new_pixel)
+                
+    def auto_tune_brightness(self):
+        sum = 0
+        for y in range(self.height):
+            for x in range(self.width):
+                pixel = self.get_pixel(x, y)
+                grayscale = (pixel[0] + pixel[1] + pixel[2])/3
+                sum += grayscale - 128
+        average_offset = -math.floor(sum // (self.height * self.width))
+                
+        for y in range(self.height):
+            for x in range(self.width):
+                pixel = self.get_pixel(x, y)
+                grayscale = math.floor((pixel[0] + pixel[1] + pixel[2])/3)
+                
+                new_pixel = (pixel[0] + average_offset, pixel[1] +
+                             average_offset, pixel[2] + average_offset)
+
+                self.set_pixel(x, y, new_pixel)
+
+    def auto_tune_contrast(self):
+        histogram = [0] * 256
+        for y in range(self.height):
+            for x in range(self.width):
+                pixel = self.get_pixel(x, y)
+                grayscale = math.floor((pixel[0] + pixel[1] + pixel[2])/3)
+                if grayscale >= 256:
+                    print("Stop")
+                histogram[grayscale] += 1
+        total_pixels = self.width * self.height
+        # How far should we scale so that X% of the pixels span 0 to 255?
+        outlier_count = total_pixels * .025
+        sum = 0
+        offset_index = 0
+        cont = True
+        while cont:
+            dark_index = offset_index
+            light_index = 255 - offset_index
+            sum += histogram[dark_index] + histogram[light_index]
+            offset_index += 1
+            if sum > outlier_count:
+                break
+        desired_width = 255 - (offset_index*2)
+        scale = 255 / desired_width
+        self.add_contrast2(scale)
+
+        
 
     def set_pixel(self, x, y, color) -> None:
         """Set a pixel in the layer buffer"""
